@@ -1,0 +1,13 @@
+.pio
+.pio/
+.pio/*
+.pio/**
+.pio_nosave
+.pioenvs
+.piolibdeps
+.clang_complete
+.gcc-flags.json
+**/.*
+**/.pio/
+**/.pio/*
+**/.pio/**
