@@ -9,12 +9,11 @@ struct SystemSettings {
     char apPass[65];
     char staSSID[33];
     char staPass[65];
-    char sequence[128]; // Max 128 chars of sequence
-    uint8_t interval; // Interval in minutes
-    uint8_t contrast;
-    uint8_t ledSetting;
-    uint8_t pitch;
-    uint8_t speed;
+    char sequence[128];
+    char morseMessage[128];
+    uint8_t interval;
+    uint8_t broadcastMode;
+    uint16_t wpm;
 };
 
 class Config {
