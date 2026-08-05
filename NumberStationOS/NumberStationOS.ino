@@ -5,8 +5,10 @@
 
 // Audio includes
 #include <AudioOutputI2SNoDAC.h>
+#include "ESP8266SAM.h"
 
 AudioOutputI2SNoDAC *out = nullptr;
+ESP8266SAM *sam = nullptr;
 
 bool isBroadcasting = false;
 uint32_t lastBroadcastTime = 0;
@@ -141,8 +143,14 @@ void playSequence() {
 
     if (settings.broadcastMode == 0) {
         playToneSequence(settings.sequence);
-    } else {
+    } else if (settings.broadcastMode == 1) {
         playMorseSequence(settings.morseMessage, settings.wpm);
+    } else if (settings.broadcastMode == 2) {
+        if (sam) {
+            sam->SetPitch(settings.pitch);
+            sam->SetSpeed(settings.speed);
+            sam->Say(out, settings.ttsMessage);
+        }
     }
 }
 
@@ -154,6 +162,7 @@ void setup() {
 
     out = new AudioOutputI2SNoDAC();
     out->begin();
+    sam = new ESP8266SAM();
 
     WiFiController::getInstance().begin();
     Serial.println("System Ready.");

@@ -30,7 +30,10 @@ void Config::resetToDefaults() {
     strcpy(_settings.staPass, "");
     strcpy(_settings.sequence, "5 4 3 2 1");
     strcpy(_settings.morseMessage, "HELLO");
+    strcpy(_settings.ttsMessage, "SYSTEM READY");
     _settings.interval = 1;
     _settings.broadcastMode = 0;
     _settings.wpm = 20;
+    _settings.pitch = 64;
+    _settings.speed = 72;
 }

@@ -30,6 +30,7 @@ const char PAGE_INDEX[] PROGMEM = R"=====(
         <select id="broadcast_mode" onchange="toggleMode()">
             <option value="0">Tonal Number Sequence</option>
             <option value="1">Morse Code Cipher</option>
+            <option value="2">Voice Synthesizer (TTS)</option>
         </select>
 
         <div id="mode0_div">
@@ -42,6 +43,15 @@ const char PAGE_INDEX[] PROGMEM = R"=====(
             <input type="text" id="morse_message" placeholder="e.g. THE EAGLE HAS LANDED">
             <label>WPM (Words Per Minute):</label>
             <input type="number" id="wpm" value="20" min="5" max="60">
+        </div>
+
+        <div id="mode2_div" style="display:none;">
+            <label>TTS Broadcast Message:</label>
+            <input type="text" id="tts_message" placeholder="e.g. ALPHA BRAVO CHARLIE">
+            <label>Pitch (0-255):</label>
+            <input type="number" id="pitch" value="64" min="0" max="255">
+            <label>Speed (0-255):</label>
+            <input type="number" id="speed" value="72" min="0" max="255">
         </div>
 
         <label>Transmission Interval (mins):</label>
@@ -63,9 +73,15 @@ const char PAGE_INDEX[] PROGMEM = R"=====(
             if (mode == "0") {
                 document.getElementById('mode0_div').style.display = "block";
                 document.getElementById('mode1_div').style.display = "none";
-            } else {
+                document.getElementById('mode2_div').style.display = "none";
+            } else if (mode == "1") {
                 document.getElementById('mode0_div').style.display = "none";
                 document.getElementById('mode1_div').style.display = "block";
+                document.getElementById('mode2_div').style.display = "none";
+            } else {
+                document.getElementById('mode0_div').style.display = "none";
+                document.getElementById('mode1_div').style.display = "none";
+                document.getElementById('mode2_div').style.display = "block";
             }
         }
         function saveSettings() {
@@ -74,6 +90,9 @@ const char PAGE_INDEX[] PROGMEM = R"=====(
             xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
             var params = "sequence=" + encodeURIComponent(document.getElementById('sequence').value) +
                          "&morse_message=" + encodeURIComponent(document.getElementById('morse_message').value) +
+                         "&tts_message=" + encodeURIComponent(document.getElementById('tts_message').value) +
+                         "&pitch=" + document.getElementById('pitch').value +
+                         "&speed=" + document.getElementById('speed').value +
                          "&interval=" + document.getElementById('interval').value +
                          "&broadcast_mode=" + document.getElementById('broadcast_mode').value +
                          "&wpm=" + document.getElementById('wpm').value;

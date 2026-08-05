@@ -11,9 +11,12 @@ struct SystemSettings {
     char staPass[65];
     char sequence[128];
     char morseMessage[128];
+    char ttsMessage[128];
     uint8_t interval;
     uint8_t broadcastMode;
     uint16_t wpm;
+    uint8_t pitch;
+    uint8_t speed;
 };
 
 class Config {
