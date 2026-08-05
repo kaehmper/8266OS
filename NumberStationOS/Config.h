@@ -4,13 +4,17 @@
 #include <Arduino.h>
 
 struct SystemSettings {
-    uint16_t magic;          // Magic number to verify initialization
-    char wifiSSID[33];       // Max 32 chars + null
-    char wifiPass[65];       // Max 64 chars + null
-    uint8_t contrast;        // OLED contrast (0 - 255)
-    uint8_t ledSetting;      // 0: Off, 1: On, 2: Blink, 3: Breathe (default)
-    uint32_t gameHighScore;  // High score of Flappy ESP
-    uint8_t screenSaverMins; // Screen saver idle timeout (0 to disable)
+    uint32_t magic;
+    char apSSID[33];
+    char apPass[65];
+    char staSSID[33];
+    char staPass[65];
+    char sequence[128]; // Max 128 chars of sequence
+    uint8_t interval; // Interval in minutes
+    uint8_t contrast;
+    uint8_t ledSetting;
+    uint8_t pitch;
+    uint8_t speed;
 };
 
 class Config {
