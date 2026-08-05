@@ -54,8 +54,6 @@ private:
 
     void setupWebServer();
     void handleRoot();
-    void handleGetMessages();
-    void handleSendMessage();
     void handleScanResults();
     void handleConnectSTA();
     void handleGetStatus();

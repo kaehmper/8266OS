@@ -29,11 +29,15 @@ void Config::save() {
 void Config::resetToDefaults() {
     memset(&_settings, 0, sizeof(SystemSettings));
     _settings.magic = MAGIC_VAL;
-    strcpy(_settings.wifiSSID, "");
-    strcpy(_settings.wifiPass, "");
+    strcpy(_settings.apSSID, "");
+    strcpy(_settings.apPass, "");
+    strcpy(_settings.staSSID, "");
+    strcpy(_settings.staPass, "");
+    strcpy(_settings.sequence, "5 4 3 2 1");
     _settings.contrast = 127;
     _settings.ledSetting = 3; // Breathe by default
-    _settings.gameHighScore = 0;
-    _settings.screenSaverMins = 2; // 2 minutes default screen saver
+    _settings.interval = 1;
+    _settings.pitch = 64;
+    _settings.speed = 72;
     save();
 }
