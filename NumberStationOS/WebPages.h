@@ -10,63 +10,254 @@ const char PAGE_INDEX[] PROGMEM = R"=====(
     <title>Number Station OS</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
-        body { font-family: monospace; background-color: #111; color: #0f0; padding: 20px; }
-        h1 { color: #0f0; }
-        input[type="text"], input[type="number"] { background-color: #222; color: #0f0; border: 1px solid #0f0; padding: 5px; margin: 5px 0; width: 100%; box-sizing: border-box; }
-        button { background-color: #0f0; color: #111; border: none; padding: 10px 20px; cursor: pointer; margin-top: 10px; font-weight: bold; }
-        button:hover { background-color: #afa; }
-        .panel { border: 1px solid #0f0; padding: 15px; margin-bottom: 20px; }
+        body {
+            background-color: #c0c0c0; /* Light grey background */
+            margin: 0;
+            padding: 20px;
+            font-family: Arial, sans-serif; /* Fallback for bold styling */
+        }
+
+        /* Top Power Button */
+        .power-btn-container {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 20px;
+        }
+        .power-btn {
+            background: none;
+            border: 2px solid #555;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .power-btn:hover { background-color: #a0a0a0; }
+        .power-icon {
+            width: 20px;
+            height: 20px;
+            stroke: #555;
+            stroke-width: 2;
+            fill: none;
+        }
+
+        /* Screen / Waveform */
+        .screen {
+            background-color: #4a4a4a;
+            border: 8px solid #000;
+            border-radius: 40px;
+            height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 30px;
+            overflow: hidden;
+        }
+        .waveform {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            height: 60%;
+        }
+        .bar {
+            width: 2px;
+            background-color: #fff;
+            border-radius: 0;
+            transition: height 0.1s;
+        }
+
+        /* Input Sections */
+        .section {
+            margin-bottom: 20px;
+        }
+        .section-title {
+            font-family: 'Arial Black', Impact, sans-serif;
+            font-size: 24px;
+            margin: 0 0 5px 10px;
+            color: #000;
+            text-transform: uppercase;
+        }
+        .input-group {
+            display: flex;
+            background-color: #c0c0c0;
+            border: 3px solid #000;
+            border-radius: 30px;
+            overflow: hidden;
+            height: 60px;
+        }
+        .input-field {
+            flex-grow: 1;
+            background: transparent;
+            border: none;
+            padding: 0 20px;
+            font-size: 18px;
+            outline: none;
+            font-family: monospace;
+            min-width: 0;
+        }
+        .action-btn {
+            background: transparent;
+            border: none;
+            border-left: 3px solid #000;
+            width: 70px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .action-btn:hover {
+            background-color: #a0a0a0;
+        }
+        .action-icon {
+            width: 30px;
+            height: 30px;
+            stroke: #000;
+            stroke-width: 2;
+            fill: none;
+        }
     </style>
 </head>
 <body>
-    <h1>NUMBER STATION OS</h1>
 
-    <div class="panel">
-        <h2>Broadcast Sequence</h2>
-        <input type="text" id="sequence" placeholder="e.g. 5 4 3 2 1">
-        <br>
-        <label>Interval (mins):</label>
-        <input type="number" id="interval" value="1" min="1">
-        <br>
-        <label>Pitch (0-255):</label>
-        <input type="number" id="pitch" value="64" min="0" max="255">
-        <br>
-        <label>Speed (0-255):</label>
-        <input type="number" id="speed" value="72" min="0" max="255">
-        <br>
-        <button onclick="saveSettings()">Save Configuration</button>
+    <div class="power-btn-container">
+        <button class="power-btn" onclick="stopBroadcast()">
+            <svg class="power-icon" viewBox="0 0 24 24">
+                <path d="M12 2v10M18.36 5.64a9 9 0 1 1-12.73 0"></path>
+            </svg>
+        </button>
     </div>
 
-    <div class="panel">
-        <h2>Control</h2>
-        <button onclick="startBroadcast()">START BROADCAST</button>
-        <button onclick="stopBroadcast()">STOP</button>
-        <p id="status">Status: Idle</p>
+    <div class="screen">
+        <div class="waveform" id="waveform">
+            <!-- Bars generated by JS -->
+        </div>
+    </div>
+
+    <div class="section">
+        <h2 class="section-title">TTS:</h2>
+        <div class="input-group">
+            <input type="text" class="input-field" id="tts_message" value="">
+            <button class="action-btn" onclick="playMode(2)">
+                <svg class="action-icon" viewBox="0 0 24 24">
+                    <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2 class="section-title">MORSE:</h2>
+        <div class="input-group">
+            <input type="text" class="input-field" id="morse_message" value="">
+            <button class="action-btn" onclick="playMode(1)">
+                <svg class="action-icon" viewBox="0 0 24 24">
+                    <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2 class="section-title">TONE:</h2>
+        <div class="input-group">
+            <input type="text" class="input-field" id="sequence" value="">
+            <button class="action-btn" onclick="playMode(0)">
+                <svg class="action-icon" viewBox="0 0 24 24">
+                    <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2 class="section-title">INTERVAL SEC:</h2>
+        <div class="input-group">
+            <input type="number" class="input-field" id="interval" value="10">
+            <button class="action-btn" onclick="saveInterval()">
+                <svg class="action-icon" viewBox="0 0 24 24">
+                    <polygon points="13 19 22 12 13 5 13 19"></polygon>
+                    <polygon points="2 19 11 12 2 5 2 19"></polygon>
+                </svg>
+            </button>
+        </div>
     </div>
 
     <script>
-        function saveSettings() {
+        // Init waveform
+        const wf = document.getElementById('waveform');
+        const numBars = 20;
+        for(let i=0; i<numBars; i++) {
+            let bar = document.createElement('div');
+            bar.className = 'bar';
+            bar.style.height = '10%';
+            wf.appendChild(bar);
+        }
+
+        let animationInterval;
+
+        function startAnimation() {
+            if(animationInterval) clearInterval(animationInterval);
+            const bars = document.getElementsByClassName('bar');
+            animationInterval = setInterval(() => {
+                for(let bar of bars) {
+                    bar.style.height = Math.floor(Math.random() * 90 + 10) + '%';
+                }
+            }, 100);
+        }
+
+        function stopAnimation() {
+            if(animationInterval) clearInterval(animationInterval);
+            const bars = document.getElementsByClassName('bar');
+            for(let bar of bars) {
+                bar.style.height = '10%';
+            }
+        }
+
+        function playMode(mode) {
+            var xhr = new XMLHttpRequest();
+            xhr.open("POST", "/save_config", false);
+            xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+            var params = "sequence=" + encodeURIComponent(document.getElementById('sequence').value) +
+                         "&morse_message=" + encodeURIComponent(document.getElementById('morse_message').value) +
+                         "&tts_message=" + encodeURIComponent(document.getElementById('tts_message').value) +
+                         "&interval=" + document.getElementById('interval').value +
+                         "&broadcast_mode=" + mode;
+            xhr.send(params);
+
+            // Start
+            var xhrStart = new XMLHttpRequest();
+            xhrStart.open("POST", "/start", true);
+            xhrStart.send();
+
+            startAnimation();
+        }
+
+        function saveInterval() {
             var xhr = new XMLHttpRequest();
             xhr.open("POST", "/save_config", true);
             xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
-            var params = "sequence=" + encodeURIComponent(document.getElementById('sequence').value) +
-                         "&interval=" + document.getElementById('interval').value +
-                         "&pitch=" + document.getElementById('pitch').value +
-                         "&speed=" + document.getElementById('speed').value;
-            xhr.send(params);
-            xhr.onload = function() { alert("Saved"); }
+            xhr.send("interval=" + document.getElementById('interval').value);
         }
-        function startBroadcast() {
-            var xhr = new XMLHttpRequest();
-            xhr.open("POST", "/start", true);
-            xhr.send();
-            document.getElementById('status').innerText = "Status: Broadcasting";
-        }
+
         function stopBroadcast() {
             var xhr = new XMLHttpRequest();
             xhr.open("POST", "/stop", true);
             xhr.send();
-            document.getElementById('status').innerText = "Status: Idle";
+            stopAnimation();
+        }
+
+        // Fetch current values on load
+        window.onload = function() {
+            fetch('/config.json')
+              .then(response => response.json())
+              .then(data => {
+                  document.getElementById('sequence').value = data.sequence || "";
+                  document.getElementById('morse_message').value = data.morse_message || "";
+                  document.getElementById('tts_message').value = data.tts_message || "";
+                  document.getElementById('interval').value = data.interval || "10";
+              }).catch(e => console.log("No initial config loaded."));
         }
     </script>
 </body>

@@ -68,7 +68,20 @@ void WiFiController::setupWebServer() {
     _webServer.on("/connect", HTTP_POST, std::bind(&WiFiController::handleConnectSTA, this));
     _webServer.on("/status", HTTP_GET, std::bind(&WiFiController::handleGetStatus, this));
 
+
+    _webServer.on("/config.json", HTTP_GET, [this]() {
+        SystemSettings& settings = Config::getInstance().getSettings();
+        String json = "{";
+        json += "\"sequence\":\"" + String(settings.sequence) + "\",";
+        json += "\"morse_message\":\"" + String(settings.morseMessage) + "\",";
+        json += "\"tts_message\":\"" + String(settings.ttsMessage) + "\",";
+        json += "\"interval\":" + String(settings.interval);
+        json += "}";
+        _webServer.send(200, "application/json", json);
+    });
+
     _webServer.on("/save_config", HTTP_POST, std::bind(&WiFiController::handleSaveConfig, this));
+
     _webServer.on("/start", HTTP_POST, [this]() {
         extern bool isBroadcasting;
         extern uint32_t lastBroadcastTime;
@@ -141,10 +154,23 @@ void WiFiController::handleGetStatus() {
 
 void WiFiController::handleSaveConfig() {
     SystemSettings& settings = Config::getInstance().getSettings();
-    if (_webServer.hasArg("sequence")) strncpy(settings.sequence, _webServer.arg("sequence").c_str(), sizeof(settings.sequence));
-    if (_webServer.hasArg("interval")) settings.interval = _webServer.arg("interval").toInt();
+    if (_webServer.hasArg("sequence")) {
+        strncpy(settings.sequence, _webServer.arg("sequence").c_str(), sizeof(settings.sequence));
+        settings.sequence[sizeof(settings.sequence) - 1] = '\0';
+    }
+    if (_webServer.hasArg("morse_message")) {
+        strncpy(settings.morseMessage, _webServer.arg("morse_message").c_str(), sizeof(settings.morseMessage));
+        settings.morseMessage[sizeof(settings.morseMessage) - 1] = 0;
+    }
+    if (_webServer.hasArg("tts_message")) {
+        strncpy(settings.ttsMessage, _webServer.arg("tts_message").c_str(), sizeof(settings.ttsMessage));
+        settings.ttsMessage[sizeof(settings.ttsMessage) - 1] = 0;
+    }
     if (_webServer.hasArg("pitch")) settings.pitch = _webServer.arg("pitch").toInt();
     if (_webServer.hasArg("speed")) settings.speed = _webServer.arg("speed").toInt();
+    if (_webServer.hasArg("interval")) settings.interval = _webServer.arg("interval").toInt();
+    if (_webServer.hasArg("broadcast_mode")) settings.broadcastMode = _webServer.arg("broadcast_mode").toInt();
+    if (_webServer.hasArg("wpm")) settings.wpm = _webServer.arg("wpm").toInt();
 
     Config::getInstance().save();
     _webServer.send(200, "text/plain", "Config Saved");
