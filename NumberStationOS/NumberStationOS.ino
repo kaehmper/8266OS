@@ -174,8 +174,8 @@ void loop() {
 
     SystemSettings& settings = Config::getInstance().getSettings();
     if (isBroadcasting) {
-        uint32_t intervalMs = settings.interval * 60 * 1000;
-        if (intervalMs == 0) intervalMs = 60000;
+        uint32_t intervalMs = settings.interval * 1000;
+        if (intervalMs == 0) intervalMs = 1000;
 
         if (millis() - lastBroadcastTime > intervalMs) {
             playSequence();

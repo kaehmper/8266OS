@@ -10,108 +10,254 @@ const char PAGE_INDEX[] PROGMEM = R"=====(
     <title>Number Station OS</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
-        body { font-family: 'Courier New', Courier, monospace; background-color: #050505; color: #00ff00; padding: 20px; text-shadow: 0 0 5px #00ff00; }
-        h1 { color: #00ff00; border-bottom: 2px solid #00ff00; padding-bottom: 10px; text-align: center; }
-        input[type="text"], input[type="number"], select { background-color: #111; color: #00ff00; border: 1px solid #00ff00; padding: 10px; margin: 10px 0; width: 100%; box-sizing: border-box; font-family: monospace; font-size: 16px; }
-        button { background-color: #00ff00; color: #000; border: none; padding: 15px 20px; cursor: pointer; margin-top: 15px; font-weight: bold; width: 100%; font-size: 18px; text-transform: uppercase; }
-        button:hover { background-color: #00cc00; }
-        .panel { border: 1px dashed #00ff00; padding: 20px; margin-bottom: 20px; background-color: rgba(0, 255, 0, 0.05); }
-        label { font-weight: bold; }
-        .crt::before { content: " "; display: block; position: absolute; top: 0; left: 0; bottom: 0; right: 0; background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06)); z-index: 2; background-size: 100% 2px, 3px 100%; pointer-events: none; }
+        body {
+            background-color: #c0c0c0; /* Light grey background */
+            margin: 0;
+            padding: 20px;
+            font-family: Arial, sans-serif; /* Fallback for bold styling */
+        }
+
+        /* Top Power Button */
+        .power-btn-container {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 20px;
+        }
+        .power-btn {
+            background: none;
+            border: 2px solid #555;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .power-btn:hover { background-color: #a0a0a0; }
+        .power-icon {
+            width: 20px;
+            height: 20px;
+            stroke: #555;
+            stroke-width: 2;
+            fill: none;
+        }
+
+        /* Screen / Waveform */
+        .screen {
+            background-color: #4a4a4a;
+            border: 8px solid #000;
+            border-radius: 40px;
+            height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 30px;
+            overflow: hidden;
+        }
+        .waveform {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            height: 60%;
+        }
+        .bar {
+            width: 2px;
+            background-color: #fff;
+            border-radius: 0;
+            transition: height 0.1s;
+        }
+
+        /* Input Sections */
+        .section {
+            margin-bottom: 20px;
+        }
+        .section-title {
+            font-family: 'Arial Black', Impact, sans-serif;
+            font-size: 24px;
+            margin: 0 0 5px 10px;
+            color: #000;
+            text-transform: uppercase;
+        }
+        .input-group {
+            display: flex;
+            background-color: #c0c0c0;
+            border: 3px solid #000;
+            border-radius: 30px;
+            overflow: hidden;
+            height: 60px;
+        }
+        .input-field {
+            flex-grow: 1;
+            background: transparent;
+            border: none;
+            padding: 0 20px;
+            font-size: 18px;
+            outline: none;
+            font-family: monospace;
+            min-width: 0;
+        }
+        .action-btn {
+            background: transparent;
+            border: none;
+            border-left: 3px solid #000;
+            width: 70px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .action-btn:hover {
+            background-color: #a0a0a0;
+        }
+        .action-icon {
+            width: 30px;
+            height: 30px;
+            stroke: #000;
+            stroke-width: 2;
+            fill: none;
+        }
     </style>
 </head>
-<body class="crt">
-    <h1>NUMBER STATION OS</h1>
+<body>
 
-    <div class="panel">
-        <h2>TRANSMISSION PROTOCOL</h2>
-
-        <label>Mode:</label>
-        <select id="broadcast_mode" onchange="toggleMode()">
-            <option value="0">Tonal Number Sequence</option>
-            <option value="1">Morse Code Cipher</option>
-            <option value="2">Voice Synthesizer (TTS)</option>
-        </select>
-
-        <div id="mode0_div">
-            <label>Number Sequence (0-9):</label>
-            <input type="text" id="sequence" placeholder="e.g. 5 4 3 2 1">
-        </div>
-
-        <div id="mode1_div" style="display:none;">
-            <label>Morse Message:</label>
-            <input type="text" id="morse_message" placeholder="e.g. THE EAGLE HAS LANDED">
-            <label>WPM (Words Per Minute):</label>
-            <input type="number" id="wpm" value="20" min="5" max="60">
-        </div>
-
-        <div id="mode2_div" style="display:none;">
-            <label>TTS Broadcast Message:</label>
-            <input type="text" id="tts_message" placeholder="e.g. ALPHA BRAVO CHARLIE">
-            <label>Pitch (0-255):</label>
-            <input type="number" id="pitch" value="64" min="0" max="255">
-            <label>Speed (0-255):</label>
-            <input type="number" id="speed" value="72" min="0" max="255">
-        </div>
-
-        <label>Transmission Interval (mins):</label>
-        <input type="number" id="interval" value="1" min="1">
-
-        <button onclick="saveSettings()">Save Protocol</button>
+    <div class="power-btn-container">
+        <button class="power-btn" onclick="stopBroadcast()">
+            <svg class="power-icon" viewBox="0 0 24 24">
+                <path d="M12 2v10M18.36 5.64a9 9 0 1 1-12.73 0"></path>
+            </svg>
+        </button>
     </div>
 
-    <div class="panel">
-        <h2>STATION CONTROL</h2>
-        <button onclick="startBroadcast()" style="background-color: #f00; color: #fff;">ACTIVATE TRANSMISSION</button>
-        <button onclick="stopBroadcast()" style="background-color: #555; color: #fff;">ABORT TRANSMISSION</button>
-        <p id="status" style="text-align:center; font-size: 20px; font-weight:bold; margin-top:20px;">Status: STANDBY</p>
+    <div class="screen">
+        <div class="waveform" id="waveform">
+            <!-- Bars generated by JS -->
+        </div>
+    </div>
+
+    <div class="section">
+        <h2 class="section-title">TTS:</h2>
+        <div class="input-group">
+            <input type="text" class="input-field" id="tts_message" value="">
+            <button class="action-btn" onclick="playMode(2)">
+                <svg class="action-icon" viewBox="0 0 24 24">
+                    <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2 class="section-title">MORSE:</h2>
+        <div class="input-group">
+            <input type="text" class="input-field" id="morse_message" value="">
+            <button class="action-btn" onclick="playMode(1)">
+                <svg class="action-icon" viewBox="0 0 24 24">
+                    <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2 class="section-title">TONE:</h2>
+        <div class="input-group">
+            <input type="text" class="input-field" id="sequence" value="">
+            <button class="action-btn" onclick="playMode(0)">
+                <svg class="action-icon" viewBox="0 0 24 24">
+                    <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2 class="section-title">INTERVAL SEC:</h2>
+        <div class="input-group">
+            <input type="number" class="input-field" id="interval" value="10">
+            <button class="action-btn" onclick="saveInterval()">
+                <svg class="action-icon" viewBox="0 0 24 24">
+                    <polygon points="13 19 22 12 13 5 13 19"></polygon>
+                    <polygon points="2 19 11 12 2 5 2 19"></polygon>
+                </svg>
+            </button>
+        </div>
     </div>
 
     <script>
-        function toggleMode() {
-            var mode = document.getElementById('broadcast_mode').value;
-            if (mode == "0") {
-                document.getElementById('mode0_div').style.display = "block";
-                document.getElementById('mode1_div').style.display = "none";
-                document.getElementById('mode2_div').style.display = "none";
-            } else if (mode == "1") {
-                document.getElementById('mode0_div').style.display = "none";
-                document.getElementById('mode1_div').style.display = "block";
-                document.getElementById('mode2_div').style.display = "none";
-            } else {
-                document.getElementById('mode0_div').style.display = "none";
-                document.getElementById('mode1_div').style.display = "none";
-                document.getElementById('mode2_div').style.display = "block";
+        // Init waveform
+        const wf = document.getElementById('waveform');
+        const numBars = 20;
+        for(let i=0; i<numBars; i++) {
+            let bar = document.createElement('div');
+            bar.className = 'bar';
+            bar.style.height = '10%';
+            wf.appendChild(bar);
+        }
+
+        let animationInterval;
+
+        function startAnimation() {
+            if(animationInterval) clearInterval(animationInterval);
+            const bars = document.getElementsByClassName('bar');
+            animationInterval = setInterval(() => {
+                for(let bar of bars) {
+                    bar.style.height = Math.floor(Math.random() * 90 + 10) + '%';
+                }
+            }, 100);
+        }
+
+        function stopAnimation() {
+            if(animationInterval) clearInterval(animationInterval);
+            const bars = document.getElementsByClassName('bar');
+            for(let bar of bars) {
+                bar.style.height = '10%';
             }
         }
-        function saveSettings() {
+
+        function playMode(mode) {
             var xhr = new XMLHttpRequest();
-            xhr.open("POST", "/save_config", true);
+            xhr.open("POST", "/save_config", false);
             xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
             var params = "sequence=" + encodeURIComponent(document.getElementById('sequence').value) +
                          "&morse_message=" + encodeURIComponent(document.getElementById('morse_message').value) +
                          "&tts_message=" + encodeURIComponent(document.getElementById('tts_message').value) +
-                         "&pitch=" + document.getElementById('pitch').value +
-                         "&speed=" + document.getElementById('speed').value +
                          "&interval=" + document.getElementById('interval').value +
-                         "&broadcast_mode=" + document.getElementById('broadcast_mode').value +
-                         "&wpm=" + document.getElementById('wpm').value;
+                         "&broadcast_mode=" + mode;
             xhr.send(params);
-            xhr.onload = function() { alert("PROTOCOL SAVED"); }
+
+            // Start
+            var xhrStart = new XMLHttpRequest();
+            xhrStart.open("POST", "/start", true);
+            xhrStart.send();
+
+            startAnimation();
         }
-        function startBroadcast() {
+
+        function saveInterval() {
             var xhr = new XMLHttpRequest();
-            xhr.open("POST", "/start", true);
-            xhr.send();
-            document.getElementById('status').innerText = "Status: TRANSMITTING";
-            document.getElementById('status').style.color = "#f00";
+            xhr.open("POST", "/save_config", true);
+            xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+            xhr.send("interval=" + document.getElementById('interval').value);
         }
+
         function stopBroadcast() {
             var xhr = new XMLHttpRequest();
             xhr.open("POST", "/stop", true);
             xhr.send();
-            document.getElementById('status').innerText = "Status: STANDBY";
-            document.getElementById('status').style.color = "#0f0";
+            stopAnimation();
+        }
+
+        // Fetch current values on load
+        window.onload = function() {
+            fetch('/config.json')
+              .then(response => response.json())
+              .then(data => {
+                  document.getElementById('sequence').value = data.sequence || "";
+                  document.getElementById('morse_message').value = data.morse_message || "";
+                  document.getElementById('tts_message').value = data.tts_message || "";
+                  document.getElementById('interval').value = data.interval || "10";
+              }).catch(e => console.log("No initial config loaded."));
         }
     </script>
 </body>

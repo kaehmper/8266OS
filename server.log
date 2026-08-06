@@ -1,0 +1,10 @@
+127.0.0.1 - - [06/Aug/2026 00:49:05] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [06/Aug/2026 00:49:05] code 404, message File not found
+127.0.0.1 - - [06/Aug/2026 00:49:05] "GET /config.json HTTP/1.1" 404 -
+127.0.0.1 - - [06/Aug/2026 00:50:01] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [06/Aug/2026 00:50:01] code 404, message File not found
+127.0.0.1 - - [06/Aug/2026 00:50:01] "GET /config.json HTTP/1.1" 404 -
+127.0.0.1 - - [06/Aug/2026 00:50:02] code 501, message Unsupported method ('POST')
+127.0.0.1 - - [06/Aug/2026 00:50:02] "POST /save_config HTTP/1.1" 501 -
+127.0.0.1 - - [06/Aug/2026 00:50:02] code 501, message Unsupported method ('POST')
+127.0.0.1 - - [06/Aug/2026 00:50:02] "POST /start HTTP/1.1" 501 -

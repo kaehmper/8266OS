@@ -18,6 +18,9 @@
 
 #include <Arduino.h>
 #include "ESP8266SAM.h"
+#include "WiFiController.h"
+
+extern bool isBroadcasting;
 
 #include "reciter.h"
 #include "sam.h"
@@ -34,12 +37,18 @@ void ESP8266SAM::OutputByteCallback(void *cbdata, unsigned char b)
 
 void ESP8266SAM::OutputByte(unsigned char b)
 {
+  if (!isBroadcasting) return;
+
   // Upsample from unsigned 8 bits to signed 16 bits
   int16_t sample[2];
   sample[0] = b;
   sample[0] = (((int16_t)(sample[0] & 0xff)) - 128) << 8;
   sample[1] = sample[0];
-  while (!output->ConsumeSample(sample)) yield();
+
+  while (isBroadcasting && !output->ConsumeSample(sample)) {
+      WiFiController::getInstance().update();
+      yield();
+  }
 }
 
 bool ESP8266SAM::Say(AudioOutput *out, const char *str)
@@ -83,6 +92,7 @@ bool ESP8266SAM::Say(AudioOutput *out, const char *str)
   SetInput(input);
   SAMMain(OutputByteCallback, (void*)this);
   delete samdata;
+  out->stop(); // Ensure audio finishes
   return true;
 }
 
